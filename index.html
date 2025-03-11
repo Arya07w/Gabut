@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pingpong - Mode Tantangan</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { text-align: center; font-family: Arial, sans-serif; background-color: #222; color: white; }
+        canvas { background: black; display: none; margin: 10px auto; border: 2px solid white; }
+        
+        /* Main menu */
+        #mainMenu {
+            position: absolute; width: 100%; height: 100vh;
+            background: url('background.png') no-repeat center center/cover;
+            display: flex; justify-content: center; align-items: center;
+            flex-direction: column;
+        }
+        #mainMenu h1 { font-size: 32px; margin-bottom: 20px; }
+        .menuButton {
+            padding: 15px 30px; font-size: 20px; margin: 10px;
+            border: none; border-radius: 8px;
+            background: white; color: black;
+            cursor: pointer;
+        }
+        .menuButton:active { background: gray; }
+    </style>
+</head>
+<body>
+
+    <!-- Main Menu -->
+    <div id="mainMenu">
+        <h1>Pingpong</h1>
+        <button class="menuButton" id="normalMode">Mode Normal</button>
+        <button class="menuButton" id="infiniteMode">Infinite Mode</button>
+        <button class="menuButton" id="suddenDeathMode">Sudden Death</button>
+    </div>
+
+    <h2 id="roundInfo" style="display: none;">Ronde: 1</h2>
+    <canvas id="gameCanvas" width="350" height="180"></canvas>
+    <h2 id="winnerText"></h2>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const mainMenu = document.getElementById("mainMenu");
+        const normalModeBtn = document.getElementById("normalMode");
+        const infiniteModeBtn = document.getElementById("infiniteMode");
+        const suddenDeathModeBtn = document.getElementById("suddenDeathMode");
+        const roundInfo = document.getElementById("roundInfo");
+        
+        let gameMode = "normal"; // Default mode
+        let paddleWidth = 6, paddleHeight = 35;
+        let ballX = canvas.width / 2, ballY = canvas.height / 2;
+        let ballSpeedX = 2.5, ballSpeedY = 2.5;
+        let playerY = (canvas.height - paddleHeight) / 2;
+        let aiY = (canvas.height - paddleHeight) / 2;
+        let scorePlayer = 0, scoreAI = 0;
+        let round = 1, maxRounds = 3;
+        let gameOver = false;
+
+        // Event sentuhan untuk paddle
+        let touchY = playerY;
+        canvas.addEventListener("touchmove", (e) => {
+            e.preventDefault();
+            let newY = e.touches[0].clientY - canvas.getBoundingClientRect().top;
+            playerY += (newY - touchY) * 0.8;
+            if (playerY < 0) playerY = 0;
+            if (playerY > canvas.height - paddleHeight) playerY = canvas.height - paddleHeight;
+            touchY = newY;
+        });
+
+        function update() {
+            if (gameOver) return;
+
+            let aiSpeed = 2;
+            let aiCenter = aiY + paddleHeight / 2;
+            if (aiCenter < ballY - 5) aiY += aiSpeed;
+            if (aiCenter > ballY + 5) aiY -= aiSpeed;
+
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
+
+            if (ballY <= 0 || ballY >= canvas.height) ballSpeedY *= -1;
+
+            if (ballX <= paddleWidth && ballY >= playerY && ballY <= playerY + paddleHeight) {
+                ballSpeedX *= -1;
+                if (gameMode === "suddenDeath") ballSpeedX *= 1.1; // Percepat bola
+            }
+
+            if (ballX >= canvas.width - paddleWidth && ballY >= aiY && ballY <= aiY + paddleHeight) {
+                ballSpeedX *= -1;
+            }
+
+            if (ballX < 0) {
+                scoreAI++;
+                checkRoundWinner();
+            }
+            if (ballX > canvas.width) {
+                scorePlayer++;
+                checkRoundWinner();
+            }
+        }
+
+        function checkRoundWinner() {
+            if (gameMode === "infinite") {
+                resetBall();
+                return;
+            }
+
+            if (scorePlayer === 5 || scoreAI === 5) {
+                round++;
+                roundInfo.textContent = `Ronde: ${round}`;
+                scorePlayer = 0;
+                scoreAI = 0;
+
+                if (round > maxRounds) {
+                    gameOver = true;
+                    document.getElementById("winnerText").textContent =
+                        scorePlayer > scoreAI ? "Anda Menang!" : "AI Menang!";
+                }
+            }
+            resetBall();
+        }
+
+        function resetBall() {
+            ballX = canvas.width / 2;
+            ballY = canvas.height / 2;
+            ballSpeedX = (Math.random() > 0.5 ? 1 : -1) * 2.5;
+            if (gameMode === "suddenDeath") ballSpeedX = (Math.random() > 0.5 ? 1 : -1) * 3;
+        }
+
+        function draw() {
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.setLineDash([5, 5]);
+            ctx.strokeStyle = "white";
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2, 0);
+            ctx.lineTo(canvas.width / 2, canvas.height);
+            ctx.stroke();
+
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, playerY, paddleWidth, paddleHeight);
+            ctx.fillRect(canvas.width - paddleWidth, aiY, paddleWidth, paddleHeight);
+
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, 5, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.font = "14px Arial";
+            ctx.fillText(scorePlayer, canvas.width / 4, 20);
+            ctx.fillText(scoreAI, (3 * canvas.width) / 4, 20);
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            if (!gameOver) requestAnimationFrame(gameLoop);
+        }
+
+        function startGame(mode) {
+            gameMode = mode;
+            mainMenu.style.display = "none";
+            canvas.style.display = "block";
+            roundInfo.style.display = mode === "normal" ? "block" : "none";
+            gameOver = false;
+            scorePlayer = 0;
+            scoreAI = 0;
+            round = 1;
+            resetBall();
+            gameLoop();
+        }
+
+        normalModeBtn.addEventListener("click", () => startGame("normal"));
+        infiniteModeBtn.addEventListener("click", () => startGame("infinite"));
+        suddenDeathModeBtn.addEventListener("click", () => startGame("suddenDeath"));
+
+    </script>
+</body>
+</html>
