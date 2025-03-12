@@ -26,6 +26,31 @@
         #coinDisplay, #scoreDisplay, #roundInfo {
             font-size: 18px; margin-bottom: 10px; color: gold;
         }
+         #settingsButton {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            background: white;
+            color: black;
+            font-size: 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        #settingsMenu {
+            display: none;
+            position: absolute;
+            top: 60px;
+            right: 10px;
+            background: white;
+            color: black;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
     </style>
 </head>
 <body>
@@ -39,6 +64,15 @@
         <button class="menuButton" id="suddenDeathMode">Sudden Death</button>
         <button class="menuButton" id="shopButton">Toko</button>
     </div>
+
+      <button id="settingsButton">⚙</button>
+    <div id="settingsMenu">
+        <button id="toggleMusic">Musik: Mati</button>
+    </div>
+
+    <audio id="backgroundMusic" loop>
+        <source src="musik.mp3" type="audio/mp3">
+    </audio>
 
     <h2 id="roundInfo" style="display: none;">Ronde: 1</h2>
     <p id="scoreDisplay" style="display: none;">Skor: 0 - 0</p>
@@ -56,6 +90,11 @@
         const roundInfo = document.getElementById("roundInfo");
         const scoreDisplay = document.getElementById("scoreDisplay");
         const coinDisplay = document.getElementById("coinDisplay");
+        const settingsButton = document.getElementById("settingsButton");
+        const settingsMenu = document.getElementById("settingsMenu");
+        const toggleMusicButton = document.getElementById("toggleMusic");
+        const backgroundMusic = document.getElementById("backgroundMusic");
+        let isMusicPlaying = false;
 
         let gameMode = "normal";
         let paddleWidth = 6, paddleHeight = 35;
@@ -197,6 +236,17 @@
             resetBall();
             gameLoop();
         }
+
+        toggleMusicButton.addEventListener("click", () => {
+            if (isMusicPlaying) {
+                backgroundMusic.pause();
+                toggleMusicButton.textContent = "Musik: Mati";
+            } else {
+                backgroundMusic.play();
+                toggleMusicButton.textContent = "Musik: Nyala";
+            }
+            isMusicPlaying = !isMusicPlaying;
+        });
 
         normalModeBtn.addEventListener("click", () => startGame("normal"));
         infiniteModeBtn.addEventListener("click", () => startGame("infinite"));
