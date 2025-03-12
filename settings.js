@@ -1,5 +1,16 @@
 document.addEventListener("DOMContentLoaded", function () {
     const settingsButton = document.getElementById("settingsButton");
+
+    if (!settingsButton) {
+        console.error("Tombol Pengaturan tidak ditemukan!");
+    } else {
+        console.log("Tombol Pengaturan ditemukan!");
+    }
+});
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const settingsButton = document.getElementById("settingsButton");
     const settingsMenu = document.getElementById("settingsMenu");
     const toggleMusicButton = document.getElementById("toggleMusic");
     const backgroundMusic = document.getElementById("backgroundMusic");
