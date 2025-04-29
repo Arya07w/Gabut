@@ -1,250 +1,599 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pingpong - Mode Tantangan</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { text-align: center; font-family: Arial, sans-serif; background-color: #222; color: white; }
-        canvas { background: black; display: none; margin: 10px auto; border: 2px solid white; }
-        
-        #mainMenu {
-            position: absolute; width: 100%; height: 100vh;
-            background: url('background.png') no-repeat center center/cover;
-            display: flex; justify-content: center; align-items: center;
-            flex-direction: column;
-        }
-        #mainMenu h1 { font-size: 32px; margin-bottom: 20px; }
-        .menuButton {
-            padding: 15px 30px; font-size: 20px; margin: 10px;
-            border: none; border-radius: 8px;
-            background: white; color: black;
-            cursor: pointer;
-        }
-        .menuButton:active { background: gray; }
-        #coinDisplay, #scoreDisplay, #roundInfo {
-            font-size: 18px; margin-bottom: 10px; color: gold;
-        }
-        #settingsButton {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 40px;
-    height: 40px;
-    background: white;
-    color: black;
-    font-size: 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-#settingsButton {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 40px;
-    height: 40px;
-    background: white;
-    color: black;
-    font-size: 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-        #settingsButton {
-    display: block !important;
-}
-
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pameran Seni - Lukisan dan Patung Semi Monokrom</title>
+  <meta name="description" content="Pameran Seni Lukisan dan Patung dengan sentuhan semi monokrom, menonjolkan emosi dan bentuk melalui kesederhanaan warna. 28-29 Mei 2025 di SMPN 2 Jember.">
+  <meta name="keywords" content="Pameran, Seni, Lukisan, Patung, Monokrom, Jember, Art Exhibition">
+  <meta name="author" content="SMPN 2 Jember">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Helvetica Neue', sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      transition: background 0.5s, color 0.5s;
+    }
+    header {
+      background-color: #111;
+      color: #fff;
+      padding: 2rem;
+      text-align: center;
+      position: relative;
+    }
+    section {
+      padding: 2rem;
+      animation: fadeIn 1s ease forwards;
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    .artwork {
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: transform 0.3s, background 0.5s, color 0.5s;
+      cursor: pointer;
+    }
+    .artwork:hover {
+      transform: scale(1.05);
+    }
+    .artwork img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      filter: grayscale(100%);
+      transition: filter 0.5s;
+    }
+    .artwork:hover img {
+      filter: grayscale(0%);
+    }
+    .artwork-content {
+      padding: 1rem;
+      text-align: center;
+    }
+    .filter-btns, .theme-btn {
+      text-align: center;
+      margin-top: 1rem;
+    }
+    .filter-btns button, .theme-btn button {
+      margin: 0.5rem;
+      padding: 0.7rem 1.5rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 30px;
+      background-color: #333;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+    .filter-btns button:hover, .theme-btn button:hover {
+      background-color: #555;
+      transform: translateY(-2px);
+    }
+    footer {
+      background: #222;
+      color: #bbb;
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.9rem;
+      margin-top: 2rem;
+    }
+    .popup {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+    }
+    .popup-content {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 8px;
+      max-width: 600px;
+      max-height: 90%;
+      overflow-y: auto;
+      text-align: center;
+    }
+    .popup-content img {
+      width: 100%;
+      height: auto;
+      margin-bottom: 1rem;
+    }
+    .popup-close {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      font-size: 2rem;
+      color: #fff;
+      cursor: pointer;
+    }
+    #preloader {
+      background: #111;
+      width: 100%;
+      height: 100%;
+      position: fixed;
+      z-index: 999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 2rem;
+    }
+    #progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 5px;
+      background: #ff6347;
+      width: 0%;
+      z-index: 1000;
+    }
+    .dark-mode {
+      background-color: #222;
+      color: #f5f5f5;
+    }
+    .dark-mode .artwork {
+      background: #333;
+      color: #f5f5f5;
+    }
+    .share-buttons {
+      margin-top: 1rem;
+      text-align: center;
+    }
+    .share-buttons a {
+      margin: 0 0.5rem;
+      font-size: 1.5rem;
+      color: inherit;
+      text-decoration: none;
+    }
+    #countdown {
+      font-size: 1.2rem;
+      margin-top: 1rem;
+    }
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+  </style>
 </head>
-<body>
 
-    <!-- Main Menu -->
-    <div id="mainMenu">
-        <h1>Pingpong</h1>
-        <p id="coinDisplay">Koin: 0</p>
-        <button class="menuButton" id="normalMode">Mode Normal</button>
-        <button class="menuButton" id="infiniteMode">Infinite Mode</button>
-        <button class="menuButton" id="suddenDeathMode">Sudden Death</button>
-        <button class="menuButton" id="shopButton">Toko</button>
-       <button id="settingsButton">⚙</button>
+<body onload="initPage()">
 
-<div id="settingsMenu">
-    <button id="toggleMusic">Musik: Mati</button>
+<!-- Preloader -->
+<div id="preloader">Loading...</div>
+
+<!-- Scroll Progress -->
+<div id="progress-bar"></div>
+
+<header>
+  <h1>Pameran Seni</h1>
+  <p>Menampilkan Lukisan dan Patung dalam Sentuhan Monokrom</p>
+  <div id="countdown"></div>
+</header>
+
+<section class="theme-btn">
+  <button onclick="toggleDarkMode()">Ganti Tema</button>
+</section>
+
+<section>
+  <h2>Tentang Pameran</h2>
+  <p>Pameran ini menggabungkan karya seni lukisan dan patung dengan nuansa semi monokrom, menonjolkan emosi dan bentuk melalui kesederhanaan warna. 🎨✨ Diselenggarakan pada tanggal <b>28 dan 29 Mei 2025</b> di <b>SMPN 2 Jember</b>.</p>
+</section>
+
+<section>
+  <h2>Galeri Karya</h2>
+  <div class="filter-btns">
+    <button onclick="filterGallery('all')">Semua</button>
+    <button onclick="filterGallery('lukisan')">Lukisan</button>
+    <button onclick="filterGallery('patung')">Patung</button>
+  </div>
+  <div class="gallery" id="gallery">
+    <div class="artwork lukisan" onclick="openPopup('lukisan1.jpg', 'Bayangan Senja', 'Lukisan cat minyak yang menangkap keheningan sore hari.')">
+      <img src="lukisan1.jpg" alt="Lukisan 1">
+      <div class="artwork-content">
+        <h3>"Bayangan Senja"</h3>
+        <p>Lukisan cat minyak yang menangkap keheningan sore hari.</p>
+      </div>
     </div>
-    <audio id="backgroundMusic" loop>
-    <source src="musik.mp3" type="audio/mp3">
-</audio>
+    <div class="artwork patung" onclick="openPopup('patung1.jpg', 'Bentang Dingin', 'Patung marmer yang merepresentasikan kekuatan dan keheningan.')">
+      <img src="patung1.jpg" alt="Patung 1">
+      <div class="artwork-content">
+        <h3>"Bentang Dingin"</h3>
+        <p>Patung marmer yang merepresentasikan kekuatan dan keheningan.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <h2 id="roundInfo" style="display: none;">Ronde: 1</h2>
-    <p id="scoreDisplay" style="display: none;">Skor: 0 - 0</p>
-    <canvas id="gameCanvas" width="350" height="180"></canvas>
-    <h2 id="winnerText"></h2>
+<section class="share-buttons">
+  <h2>Bagikan Pameran Ini</h2>
+  <a href="https://wa.me/?text=Yuk%20kunjungi%20Pameran%20Seni%20di%20SMPN%202%20Jember%2028-29%20Mei%202025!" target="_blank">📱 WhatsApp</a>
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://yourwebsite.com" target="_blank">📘 Facebook</a>
+  <a href="https://www.instagram.com/" target="_blank">📸 Instagram</a>
+</section>
 
-    <script>
-        const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
-        const mainMenu = document.getElementById("mainMenu");
-        const normalModeBtn = document.getElementById("normalMode");
-        const infiniteModeBtn = document.getElementById("infiniteMode");
-        const suddenDeathModeBtn = document.getElementById("suddenDeathMode");
-        const shopButton = document.getElementById("shopButton");
-        const roundInfo = document.getElementById("roundInfo");
-        const scoreDisplay = document.getElementById("scoreDisplay");
-        const coinDisplay = document.getElementById("coinDisplay");
+<!-- Popup -->
+<div class="popup" id="popup">
+  <span class="popup-close" onclick="closePopup()">&times;</span>
+  <div class="popup-content" id="popup-content"></div>
+</div>
 
-        let gameMode = "normal";
-        let paddleWidth = 6, paddleHeight = 35;
-        let ballX = canvas.width / 2, ballY = canvas.height / 2;
-        let ballSpeedX = 2.5, ballSpeedY = 2.5;
-        let playerY = (canvas.height - paddleHeight) / 2;
-        let aiY = (canvas.height - paddleHeight) / 2;
-        let scorePlayer = 0, scoreAI = 0;
-        let round = 1, maxRounds = 3;
-        let gameOver = false;
+<footer>
+  &copy; 2025 Pameran Semi Mono. Hubungi kami di email@example.com
+</footer>
 
-        // Ambil jumlah koin dari localStorage
-        let coins = localStorage.getItem("coins") ? parseInt(localStorage.getItem("coins")) : 0;
-        coinDisplay.textContent = `Koin: ${coins}`;
+<audio id="background-music" src="musik.mp3" autoplay loop></audio>
 
-        // Event sentuhan untuk paddle
-        let touchY = playerY;
-        canvas.addEventListener("touchmove", (e) => {
-            e.preventDefault();
-            let newY = e.touches[0].clientY - canvas.getBoundingClientRect().top;
-            playerY += (newY - touchY) * 0.8;
-            if (playerY < 0) playerY = 0;
-            if (playerY > canvas.height - paddleHeight) playerY = canvas.height - paddleHeight;
-            touchY = newY;
-        });
+<script>
+function initPage() {
+  document.getElementById('preloader').style.display = 'none';
+}
 
-        function update() {
-            if (gameOver) return;
+window.onscroll = function() {
+  var winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+  var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  var scrolled = (winScroll / height) * 100;
+  document.getElementById('progress-bar').style.width = scrolled + "%";
+}
 
-            let aiSpeed = 2;
-            let aiCenter = aiY + paddleHeight / 2;
-            if (aiCenter < ballY - 5) aiY += aiSpeed;
-            if (aiCenter > ballY + 5) aiY -= aiSpeed;
+function openPopup(imageSrc, title, description) {
+  const popup = document.getElementById('popup');
+  const popupContent = document.getElementById('popup-content');
+  popupContent.innerHTML = `<img src="${imageSrc}" alt="${title}"><h2>${title}</h2><p>${description}</p>`;
+  popup.style.display = 'flex';
+}
+function closePopup() {
+  document.getElementById('popup').style.display = 'none';
+}
 
-            ballX += ballSpeedX;
-            ballY += ballSpeedY;
+function toggleDarkMode() {
+  document.body.classList.toggle('dark-mode');
+}
 
-            if (ballY <= 0 || ballY >= canvas.height) ballSpeedY *= -1;
+function filterGallery(category) {
+  const items = document.querySelectorAll('.artwork');
+  items.forEach(item => {
+    if (category === 'all') {
+      item.style.display = 'block';
+    } else {
+      if (item.classList.contains(category)) {
+        item.style.display = 'block';
+      } else {
+        item.style.display = 'none';
+      }
+    }
+  });
+}
 
-            if (ballX <= paddleWidth && ballY >= playerY && ballY <= playerY + paddleHeight) {
-                ballSpeedX *= -1;
-                if (gameMode === "suddenDeath") ballSpeedX *= 1.1;
-            }
+// Countdown
+const countDownDate = new Date("May 28, 2025 00:00:00").getTime();
+const x = setInterval(function() {
+  const now = new Date().getTime();
+  const distance = countDownDate - now;
+  if (distance < 0) {
+    clearInterval(x);
+    document.getElementById("countdown").innerHTML = "Pameran sudah berlangsung!";
+    return;
+  }
+  const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+  document.getElementById("countdown").innerHTML = `Mulai dalam ${days}h ${hours}j ${minutes}m ${seconds}d`;
+}, 1000);
+</script>
 
-            if (ballX >= canvas.width - paddleWidth && ballY >= aiY && ballY <= aiY + paddleHeight) {
-                ballSpeedX *= -1;
-            }
+</body>
+</html><!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pameran Seni - Lukisan dan Patung Semi Monokrom</title>
+  <meta name="description" content="Pameran Seni Lukisan dan Patung dengan sentuhan semi monokrom, menonjolkan emosi dan bentuk melalui kesederhanaan warna. 28-29 Mei 2025 di SMPN 2 Jember.">
+  <meta name="keywords" content="Pameran, Seni, Lukisan, Patung, Monokrom, Jember, Art Exhibition">
+  <meta name="author" content="SMPN 2 Jember">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Helvetica Neue', sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      transition: background 0.5s, color 0.5s;
+    }
+    header {
+      background-color: #111;
+      color: #fff;
+      padding: 2rem;
+      text-align: center;
+      position: relative;
+    }
+    section {
+      padding: 2rem;
+      animation: fadeIn 1s ease forwards;
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    .artwork {
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: transform 0.3s, background 0.5s, color 0.5s;
+      cursor: pointer;
+    }
+    .artwork:hover {
+      transform: scale(1.05);
+    }
+    .artwork img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      filter: grayscale(100%);
+      transition: filter 0.5s;
+    }
+    .artwork:hover img {
+      filter: grayscale(0%);
+    }
+    .artwork-content {
+      padding: 1rem;
+      text-align: center;
+    }
+    .filter-btns, .theme-btn {
+      text-align: center;
+      margin-top: 1rem;
+    }
+    .filter-btns button, .theme-btn button {
+      margin: 0.5rem;
+      padding: 0.7rem 1.5rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 30px;
+      background-color: #333;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+    .filter-btns button:hover, .theme-btn button:hover {
+      background-color: #555;
+      transform: translateY(-2px);
+    }
+    footer {
+      background: #222;
+      color: #bbb;
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.9rem;
+      margin-top: 2rem;
+    }
+    .popup {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+    }
+    .popup-content {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 8px;
+      max-width: 600px;
+      max-height: 90%;
+      overflow-y: auto;
+      text-align: center;
+    }
+    .popup-content img {
+      width: 100%;
+      height: auto;
+      margin-bottom: 1rem;
+    }
+    .popup-close {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      font-size: 2rem;
+      color: #fff;
+      cursor: pointer;
+    }
+    #preloader {
+      background: #111;
+      width: 100%;
+      height: 100%;
+      position: fixed;
+      z-index: 999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 2rem;
+    }
+    #progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 5px;
+      background: #ff6347;
+      width: 0%;
+      z-index: 1000;
+    }
+    .dark-mode {
+      background-color: #222;
+      color: #f5f5f5;
+    }
+    .dark-mode .artwork {
+      background: #333;
+      color: #f5f5f5;
+    }
+    .share-buttons {
+      margin-top: 1rem;
+      text-align: center;
+    }
+    .share-buttons a {
+      margin: 0 0.5rem;
+      font-size: 1.5rem;
+      color: inherit;
+      text-decoration: none;
+    }
+    #countdown {
+      font-size: 1.2rem;
+      margin-top: 1rem;
+    }
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+  </style>
+</head>
 
-            if (ballX < 0) {
-                scoreAI++;
-                checkRoundWinner();
-            }
-            if (ballX > canvas.width) {
-                scorePlayer++;
-                checkRoundWinner();
-            }
-            scoreDisplay.textContent = `Skor: ${scorePlayer} - ${scoreAI}`;
-        }
+<body onload="initPage()">
 
-        function checkRoundWinner() {
-            if (gameMode === "infinite" || gameMode === "suddenDeath") {
-                resetBall();
-                return;
-            }
+<!-- Preloader -->
+<div id="preloader">Loading...</div>
 
-            if (scorePlayer === 5 || scoreAI === 5) {
-                round++;
-                roundInfo.textContent = `Ronde: ${round}`;
+<!-- Scroll Progress -->
+<div id="progress-bar"></div>
 
-                if (round > maxRounds) {
-                    gameOver = true;
-                    let winnerText = scorePlayer > scoreAI ? "Anda Menang!" : "AI Menang!";
-                    let earnedCoins = (scorePlayer + scoreAI) * 2;
-                    if (gameMode === "normal") {
-                        coins += earnedCoins;
-                        localStorage.setItem("coins", coins);
-                        coinDisplay.textContent = `Koin: ${coins}`;
-                    }
-                    document.getElementById("winnerText").textContent = `${winnerText} | Koin Diperoleh: ${earnedCoins}`;
+<header>
+  <h1>Pameran Seni</h1>
+  <p>Menampilkan Lukisan dan Patung dalam Sentuhan Monokrom</p>
+  <div id="countdown"></div>
+</header>
 
-                    setTimeout(() => {
-                        mainMenu.style.display = "flex";
-                        canvas.style.display = "none";
-                        roundInfo.style.display = "none";
-                        scoreDisplay.style.display = "none";
-                        document.getElementById("winnerText").textContent = "";
-                    }, 3000);
-                } else {
-                    scorePlayer = 0;
-                    scoreAI = 0;
-                }
-            }
-            resetBall();
-        }
+<section class="theme-btn">
+  <button onclick="toggleDarkMode()">Ganti Tema</button>
+</section>
 
-        function resetBall() {
-            ballX = canvas.width / 2;
-            ballY = canvas.height / 2;
-            ballSpeedX = (Math.random() > 0.5 ? 1 : -1) * 2.5;
-            if (gameMode === "suddenDeath") ballSpeedX = (Math.random() > 0.5 ? 1 : -1) * 3;
-        }
+<section>
+  <h2>Tentang Pameran</h2>
+  <p>Pameran ini menggabungkan karya seni lukisan dan patung dengan nuansa semi monokrom, menonjolkan emosi dan bentuk melalui kesederhanaan warna. 🎨✨ Diselenggarakan pada tanggal <b>28 dan 29 Mei 2025</b> di <b>SMPN 2 Jember</b>.</p>
+</section>
 
-        function draw() {
-            ctx.fillStyle = "black";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+<section>
+  <h2>Galeri Karya</h2>
+  <div class="filter-btns">
+    <button onclick="filterGallery('all')">Semua</button>
+    <button onclick="filterGallery('lukisan')">Lukisan</button>
+    <button onclick="filterGallery('patung')">Patung</button>
+  </div>
+  <div class="gallery" id="gallery">
+    <div class="artwork lukisan" onclick="openPopup('lukisan1.jpg', 'Bayangan Senja', 'Lukisan cat minyak yang menangkap keheningan sore hari.')">
+      <img src="lukisan1.jpg" alt="Lukisan 1">
+      <div class="artwork-content">
+        <h3>"Bayangan Senja"</h3>
+        <p>Lukisan cat minyak yang menangkap keheningan sore hari.</p>
+      </div>
+    </div>
+    <div class="artwork patung" onclick="openPopup('patung1.jpg', 'Bentang Dingin', 'Patung marmer yang merepresentasikan kekuatan dan keheningan.')">
+      <img src="patung1.jpg" alt="Patung 1">
+      <div class="artwork-content">
+        <h3>"Bentang Dingin"</h3>
+        <p>Patung marmer yang merepresentasikan kekuatan dan keheningan.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-            ctx.setLineDash([5, 5]);
-            ctx.strokeStyle = "white";
-            ctx.beginPath();
-            ctx.moveTo(canvas.width / 2, 0);
-            ctx.lineTo(canvas.width / 2, canvas.height);
-            ctx.stroke();
+<section class="share-buttons">
+  <h2>Bagikan Pameran Ini</h2>
+  <a href="https://wa.me/?text=Yuk%20kunjungi%20Pameran%20Seni%20di%20SMPN%202%20Jember%2028-29%20Mei%202025!" target="_blank">📱 WhatsApp</a>
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://yourwebsite.com" target="_blank">📘 Facebook</a>
+  <a href="https://www.instagram.com/" target="_blank">📸 Instagram</a>
+</section>
 
-            ctx.fillStyle = "white";
-            ctx.fillRect(0, playerY, paddleWidth, paddleHeight);
-            ctx.fillRect(canvas.width - paddleWidth, aiY, paddleWidth, paddleHeight);
+<!-- Popup -->
+<div class="popup" id="popup">
+  <span class="popup-close" onclick="closePopup()">&times;</span>
+  <div class="popup-content" id="popup-content"></div>
+</div>
 
-            ctx.beginPath();
-            ctx.arc(ballX, ballY, 5, 0, Math.PI * 2);
-            ctx.fill();
-        }
+<footer>
+  &copy; 2025 Pameran Semi Mono. Hubungi kami di email@example.com
+</footer>
 
-        function gameLoop() {
-            update();
-            draw();
-            if (!gameOver) requestAnimationFrame(gameLoop);
-        }
+<audio id="background-music" src="musik.mp3" autoplay loop></audio>
 
-        function startGame(mode) {
-            gameMode = mode;
-            mainMenu.style.display = "none";
-            canvas.style.display = "block";
-            roundInfo.style.display = mode === "normal" ? "block" : "none";
-            scoreDisplay.style.display = "block";
-            gameOver = false;
-            scorePlayer = 0;
-            scoreAI = 0;
-            round = 1;
-            resetBall();
-            gameLoop();
-        }
+<script>
+function initPage() {
+  document.getElementById('preloader').style.display = 'none';
+}
 
-        normalModeBtn.addEventListener("click", () => startGame("normal"));
-        infiniteModeBtn.addEventListener("click", () => startGame("infinite"));
-        suddenDeathModeBtn.addEventListener("click", () => startGame("suddenDeath"));
-        shopButton.addEventListener("click", () => alert("Toko masih dalam pengembangan!"));
+window.onscroll = function() {
+  var winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+  var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  var scrolled = (winScroll / height) * 100;
+  document.getElementById('progress-bar').style.width = scrolled + "%";
+}
 
-    </script>
-        
-    <script src="settings.js"></script>
-        
+function openPopup(imageSrc, title, description) {
+  const popup = document.getElementById('popup');
+  const popupContent = document.getElementById('popup-content');
+  popupContent.innerHTML = `<img src="${imageSrc}" alt="${title}"><h2>${title}</h2><p>${description}</p>`;
+  popup.style.display = 'flex';
+}
+function closePopup() {
+  document.getElementById('popup').style.display = 'none';
+}
+
+function toggleDarkMode() {
+  document.body.classList.toggle('dark-mode');
+}
+
+function filterGallery(category) {
+  const items = document.querySelectorAll('.artwork');
+  items.forEach(item => {
+    if (category === 'all') {
+      item.style.display = 'block';
+    } else {
+      if (item.classList.contains(category)) {
+        item.style.display = 'block';
+      } else {
+        item.style.display = 'none';
+      }
+    }
+  });
+}
+
+// Countdown
+const countDownDate = new Date("May 28, 2025 00:00:00").getTime();
+const x = setInterval(function() {
+  const now = new Date().getTime();
+  const distance = countDownDate - now;
+  if (distance < 0) {
+    clearInterval(x);
+    document.getElementById("countdown").innerHTML = "Pameran sudah berlangsung!";
+    return;
+  }
+  const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+  document.getElementById("countdown").innerHTML = `Mulai dalam ${days}h ${hours}j ${minutes}m ${seconds}d`;
+}, 1000);
+</script>
+
 </body>
 </html>
