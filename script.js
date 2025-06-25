@@ -6,7 +6,7 @@ const waifus = [
   { name: "Mai", anime: "Bunny Girl Senpai", rarity: "Legendary", image: "assets/waifu/mai.jpg" },
   { name: "Chizuru", anime: "Rent-a-Girlfriend", rarity: "Rare", image: "assets/waifu/chizuru.jpg" },
   { name: "Emilia", anime: "Re:Zero", rarity: "Rare", image: "assets/waifu/emilia.jpg" },
-  { name: "Rias", anime: "High School DxD", rarity: "Rare", image: "assets/waifu/rias.jpg" },
+  { name: "Masha", anime: "Alya Sometimes Hides Her Feelings in Russian", rarity: "Rare", image: "assets/waifu/masha.jpg" },
   { name: "Asuna", anime: "SAO", rarity: "Rare", image: "assets/waifu/asuna.jpg" },
   { name: "Miku", anime: "Quintuplets", rarity: "Common", image: "assets/waifu/miku.jpg" },
   { name: "Yui", anime: "Oregairu", rarity: "Common", image: "assets/waifu/yui.jpg" },
