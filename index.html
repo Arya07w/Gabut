@@ -2,30 +2,208 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Waifu Gacha Simulator</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Waifu Chat Simulator</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom, #ffe6f0, #fff);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    header {
+      width: 100%;
+      background: #ff4da6;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .container {
+      width: 100%;
+      max-width: 500px;
+      padding: 1rem;
+    }
+    .form-section, .chat-section {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+    .form-section input, .form-section textarea {
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    .chat-box {
+      height: 400px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 0.5rem;
+      border-radius: 8px;
+      background: #f9f9f9;
+      margin-bottom: 1rem;
+    }
+    .message {
+      max-width: 80%;
+      padding: 0.5rem 1rem;
+      border-radius: 15px;
+      font-size: 0.95rem;
+    }
+    .user {
+      align-self: flex-end;
+      background-color: #d9fdd3;
+    }
+    .waifu {
+      align-self: flex-start;
+      background-color: #ffe0f0;
+    }
+    .chat-input {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .chat-input input {
+      flex: 1;
+      padding: 0.5rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    .chat-input button {
+      background-color: #ff4da6;
+      border: none;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    img.preview {
+      max-width: 100px;
+      border-radius: 10px;
+      display: block;
+      margin-top: 0.5rem;
+    }
+  </style>
 </head>
 <body>
+  <header>Waifu Chat Simulator</header>
   <div class="container">
-    <h1>🎴 Waifu Gacha Simulator 🎴</h1>
-    <div id="main-waifu-display"></div>
-    <button id="gacha-button">🎲 Gacha</button>
-    <button id="daily-reward">🎁 Daily Reward</button>
-    <button id="collection-button">📜 Koleksi</button>
-    <p id="result"></p>
-    <p id="pull-count">Total Pulls: 0</p>
-    <p id="gems-count">💎 Gems: 0</p>
-    <audio id="bgm" src="assets/sound/bgm.mp3" autoplay loop></audio>
-    <audio id="legend-sound" src="assets/sound/legend.mp3"></audio>
+    <div class="form-section" id="formSection">
+      <h3>Buat Waifu Kamu</h3>
+      <input id="waifuName" placeholder="Nama" required />
+      <input id="waifuPersonality" placeholder="Kepribadian" />
+      <input id="waifuAge" placeholder="Umur" />
+      <input id="waifuBirthday" placeholder="Tanggal Lahir" />
+      <input id="waifuHobby" placeholder="Hobi" />
+      <input type="file" id="waifuImage" accept="image/*" />
+      <img id="imagePreview" class="preview" />
+      <button onclick="saveWaifu()">Simpan & Mulai Chat</button>
+    </div>
+
+    <div class="chat-section" id="chatSection" style="display:none">
+      <div class="chat-box" id="chatBox"></div>
+      <div class="chat-input">
+        <input id="userMessage" placeholder="Ketik pesan..." />
+        <button onclick="sendMessage()">Kirim</button>
+      </div>
+    </div>
   </div>
 
-  <div class="modal" id="collection-modal">
-    <h2>Koleksi Waifu Kamu</h2>
-    <div id="collection-grid"></div>
-    <button onclick="closeCollection()">Tutup</button>
-  </div>
+  <script>
+    const formSection = document.getElementById('formSection');
+    const chatSection = document.getElementById('chatSection');
+    const chatBox = document.getElementById('chatBox');
+    const userMessage = document.getElementById('userMessage');
+    const imagePreview = document.getElementById('imagePreview');
 
-  <script src="script.js"></script>
+    let waifuData = {};
+
+    document.getElementById('waifuImage').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          imagePreview.src = reader.result;
+          waifuData.image = reader.result;
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+
+    function saveWaifu() {
+      waifuData.name = document.getElementById('waifuName').value;
+      waifuData.personality = document.getElementById('waifuPersonality').value;
+      waifuData.age = document.getElementById('waifuAge').value;
+      waifuData.birthday = document.getElementById('waifuBirthday').value;
+      waifuData.hobby = document.getElementById('waifuHobby').value;
+
+      localStorage.setItem('waifuData', JSON.stringify(waifuData));
+      showChat();
+    }
+
+    function showChat() {
+      formSection.style.display = 'none';
+      chatSection.style.display = 'block';
+
+      if (waifuData.image) {
+        const img = document.createElement('img');
+        img.src = waifuData.image;
+        img.style.width = '50px';
+        img.style.borderRadius = '50%';
+        chatBox.appendChild(img);
+      }
+      addMessage(`Halo! Aku ${waifuData.name}. Senang ngobrol denganmu~`, 'waifu');
+    }
+
+    function addMessage(text, sender) {
+      const div = document.createElement('div');
+      div.className = `message ${sender}`;
+      div.innerText = text;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function sendMessage() {
+      const msg = userMessage.value;
+      if (!msg.trim()) return;
+      addMessage(msg, 'user');
+      userMessage.value = '';
+      setTimeout(() => waifuReply(msg), 600);
+    }
+
+    function waifuReply(text) {
+      const msg = text.toLowerCase();
+      let reply = "Aku nggak ngerti maksudmu...";
+
+      if (msg.includes("nama")) reply = `Namaku ${waifuData.name}, ingat ya~`;
+      else if (msg.includes("umur")) reply = `Umurku ${waifuData.age} tahun.`;
+      else if (msg.includes("hobi")) reply = `Hobiku itu ${waifuData.hobby} 💕`;
+      else if (msg.includes("lahir")) reply = `Aku lahir pada ${waifuData.birthday}.`;
+      else if (msg.includes("kamu suka apa")) reply = `Aku suka ${waifuData.hobby}, dan kamu?`;
+      else if (msg.includes("hai") || msg.includes("halo")) reply = `Hai juga~ Senang bisa ngobrol sama kamu!`;
+      else if (msg.includes("love") || msg.includes("sayang")) reply = `Ehh?! A-apa maksudmu... baka!///`;
+
+      addMessage(reply, 'waifu');
+    }
+
+    // Load waifu jika sudah pernah disimpan
+    window.onload = () => {
+      const saved = localStorage.getItem('waifuData');
+      if (saved) {
+        waifuData = JSON.parse(saved);
+        showChat();
+      }
+    }
+  </script>
 </body>
 </html>
