@@ -181,20 +181,43 @@
       setTimeout(() => waifuReply(msg), 600);
     }
 
-    function waifuReply(text) {
-      const msg = text.toLowerCase();
-      let reply = "Aku nggak ngerti maksudmu...";
+    async function waifuReply(text) {
+  addMessage(\"...\", 'waifu'); // placeholder sementara
 
-      if (msg.includes("nama")) reply = `Namaku ${waifuData.name}, ingat ya~`;
-      else if (msg.includes("umur")) reply = `Umurku ${waifuData.age} tahun.`;
-      else if (msg.includes("hobi")) reply = `Hobiku itu ${waifuData.hobby} 💕`;
-      else if (msg.includes("lahir")) reply = `Aku lahir pada ${waifuData.birthday}.`;
-      else if (msg.includes("kamu suka apa")) reply = `Aku suka ${waifuData.hobby}, dan kamu?`;
-      else if (msg.includes("hai") || msg.includes("halo")) reply = `Hai juga~ Senang bisa ngobrol sama kamu!`;
-      else if (msg.includes("love") || msg.includes("sayang")) reply = `Ehh?! A-apa maksudmu... baka!///`;
-
-      addMessage(reply, 'waifu');
+  const messages = [
+    {
+      role: \"user\",
+      parts: [{ text: `Nama: ${waifuData.name}, Kepribadian: ${waifuData.personality}, Umur: ${waifuData.age}, Hobi: ${waifuData.hobby}. Kamu adalah waifu tsundere yang sedang ngobrol dengan pemilikmu.` }]
+    },
+    {
+      role: \"user\",
+      parts: [{ text }]
     }
+  ];
+
+  const res = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
+    method: \"POST\",
+    headers: {
+      \"Content-Type\": \"application/json\"
+    },
+    body: JSON.stringify({ contents: messages })
+  });
+
+  const data = await res.json();
+
+  // Hapus \"...\" placeholder
+  const pending = chatBox.querySelector('.waifu:last-child');
+  if (pending && pending.innerText === '...') pending.remove();
+
+  try {
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || \"Aku nggak ngerti maksudmu~\";
+
+    addMessage(reply, 'waifu');
+  } catch (err) {
+    addMessage(\"Ada masalah saat menghubungi AI.\", 'waifu');
+    console.error(err);
+  }
+}
 
     // Load waifu jika sudah pernah disimpan
     window.onload = () => {
@@ -205,5 +228,7 @@
       }
     }
   </script>
+  const GEMINI_API_KEY = "ISI";
+const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 </body>
 </html>
